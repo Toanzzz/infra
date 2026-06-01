@@ -71,3 +71,7 @@ After infra code changes, run:
 ```sh
 bun run check:types
 ```
+
+## Scripts rules
+
+See `scripts/AGENTS.md` for rules governing operational and dev-tooling scripts in the `scripts/` directory.
