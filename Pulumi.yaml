@@ -1,3 +1,9 @@
 name: toan-infra
 description: Toan's Personal Infra
 runtime: { name: nodejs, options: { typescript: true } }
+config:
+  oci:region: ap-singapore-1
+  toan-infra:cloudflare-account-id: 08f58449fd3c98662d43db7ac41f2cc7
+  toan-infra:sshKeys:
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILtAGscFFSfeqQhLuNN/B5eSJrVSd9FrQVZ16SK+MEmc toan
+    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPH1q14gEDrw9FcamGFXeM66T+GdZ2jKYtE4z/dUpYB0 toan
