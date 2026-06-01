@@ -1,0 +1,6 @@
+#cloud-config
+
+# Disable the firewall, used for Oracle Linux 9
+runcmd:
+  - systemctl stop firewalld
+  - systemctl disable firewalld

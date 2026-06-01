@@ -1,0 +1,22 @@
+#cloud-config
+
+# Add user with root access & docker access
+users:
+  - name: toan
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: [wheel, docker]
+    shell: /bin/bash
+    ssh_authorized_keys: 
+      {% for key in SSH_KEYS %}
+      - {{ key }}
+      {% endfor %}
+
+{% if FILES and FILES.size > 0 %}
+# Extra Files
+write_files:
+  {% for file in FILES %}
+  - path: {{ file.path }}
+    content: |
+      {{ file.content | indent: 6 }}
+  {% endfor %}
+{% endif %}

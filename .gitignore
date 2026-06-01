@@ -1,0 +1,6 @@
+# Node modules and build output
+/bin/
+/node_modules/
+
+# Antigravity CLI
+.antigravitycli/

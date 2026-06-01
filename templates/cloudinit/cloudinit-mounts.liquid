@@ -1,0 +1,42 @@
+#cloud-config
+
+{% if MOUNTS and MOUNTS.size > 0 %}
+# Bare Systemd Method to Create an XFS Mount
+write_files:
+  {% for device in MOUNTS %}
+  {% assign device_name_safe = device.name | replace: "/", "-" %}
+  {% assign device_path_safe = device.path | remove_first: "/" | replace: "/", "-" %}
+  - path: /etc/systemd/system/mkfs.xfs_{{ device_name_safe }}.service
+    content: |
+      [Unit]
+      Description=[Terraform] Oneshot systemd service to XFS format device "{{ device.name }}"
+      After=dev-{{ device_name_safe }}.device
+      Requires=dev-{{ device_name_safe }}.device
+      [Service]
+      Type=oneshot
+      ExecStart=-/usr/sbin/mkfs.xfs /dev/{{ device.name }}
+      [Install]
+      WantedBy=local-fs.target
+  - path: /etc/systemd/system/{{ device_path_safe }}.mount
+    content: |
+      [Unit]
+      Description=[Terraform] Systemd Unit to mount "/dev/{{ device.name }}" at "{{ device.path }}"
+      After=mkfs.xfs_{{ device_name_safe }}.service
+      Requires=mkfs.xfs_{{ device_name_safe }}.service
+      [Mount]
+      What=/dev/{{ device.name }}
+      Where={{ device.path }}
+      Type=xfs
+      [Install]
+      WantedBy=multi-user.target
+  {% endfor %}
+{% endif %}
+
+runcmd:
+  # Enable services
+  {% for device in MOUNTS %}
+  {% assign device_name_safe = device.name | replace: "/", "-" %}
+  {% assign device_path_safe = device.path | remove_first: "/" | replace: "/", "-" %}
+  - sudo systemctl enable --now 'mkfs.xfs_{{ device_name_safe }}.service'
+  - sudo systemctl enable --now '{{ device_path_safe }}.mount'
+  {% endfor %}

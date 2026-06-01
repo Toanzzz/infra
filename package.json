@@ -1,0 +1,26 @@
+{
+  "name": "infra",
+  "main": "index.ts",
+  "scripts": {
+    "check": "biome check",
+    "check:fix": "biome check --fix",
+    "check:types": "tsc -p tsconfig.json",
+    "preview": "pulumi preview",
+    "test": "bun test",
+    "up": "pulumi up",
+    "output": "pulumi stack output --json > output.json"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16",
+    "@types/bun": "^1.3.14",
+    "@types/node": "^25.9.1",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@pulumi/cloudflare": "^6.17.0",
+    "@pulumi/cloudinit": "^1.6.0",
+    "@pulumi/oci": "^4.13.0",
+    "@pulumi/pulumi": "^3.113.0",
+    "liquidjs": "^10.27.0"
+  }
+}
