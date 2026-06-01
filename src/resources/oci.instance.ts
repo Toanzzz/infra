@@ -1,6 +1,6 @@
 import * as oci from '@pulumi/oci'
 import * as pulumi from '@pulumi/pulumi'
-import { type CloudInitConfig, genCloudInit } from './cloudinit'
+import { type CloudInitConfig, genCloudInit } from './cloudinit.ts'
 
 export interface OracleInstanceArgs {
   compartmentId: pulumi.Input<string>

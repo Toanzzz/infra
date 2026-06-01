@@ -24,7 +24,7 @@ export function genCloudInit(
   // biome-ignore lint/suspicious/noExplicitAny: Can be any object
   const renderTemplate = (templateName: string, data: any) => {
     const templatePath = path.resolve(
-      __dirname,
+      import.meta.dirname,
       `../../templates/cloudinit/${templateName}.liquid`
     )
     const templateContent = fs.readFileSync(templatePath, 'utf-8')

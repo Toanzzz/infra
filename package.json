@@ -1,6 +1,8 @@
 {
   "name": "infra",
-  "main": "index.ts",
+  "private": true,
+  "main": "src/index.ts",
+  "type": "module",
   "scripts": {
     "check": "biome check",
     "check:fix": "biome check --fix",

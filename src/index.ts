@@ -1,9 +1,9 @@
 import * as oci from '@pulumi/oci'
-import { loadConfig } from './config'
-import { ToanCloudflareZones } from './libs/constants'
-import { DnsRecords } from './resources/cloudflare.dns'
-import { OracleInstance } from './resources/oci.instance'
-import { Vcn } from './resources/oci.vcn'
+import { loadConfig } from './config.ts'
+import { ToanCloudflareZones } from './libs/constants.ts'
+import { DnsRecords } from './resources/cloudflare.dns.ts'
+import { OracleInstance } from './resources/oci.instance.ts'
+import { Vcn } from './resources/oci.vcn.ts'
 
 const config = loadConfig()
 
