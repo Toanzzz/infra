@@ -25,7 +25,10 @@ export class Vcn extends pulumi.ComponentResource {
         dnsLabel: 'mainvcn',
         isIpv6enabled: true,
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     const ig = new oci.core.InternetGateway(
@@ -35,7 +38,10 @@ export class Vcn extends pulumi.ComponentResource {
         vcnId: vcn.id,
         displayName: 'internet-gateway',
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     // biome-ignore lint/correctness/noUnusedVariables: Need to instantiate it
@@ -53,7 +59,10 @@ export class Vcn extends pulumi.ComponentResource {
           },
         ],
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     // biome-ignore lint/correctness/noUnusedVariables: Need to instantiate it
@@ -108,7 +117,10 @@ export class Vcn extends pulumi.ComponentResource {
           },
         ],
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     const subnet = new oci.core.Subnet(
@@ -123,7 +135,10 @@ export class Vcn extends pulumi.ComponentResource {
         ipv6cidrBlock: '2603:c024:4513:ec0f::/64',
         routeTableId: vcn.defaultRouteTableId,
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     this.vcn = vcn

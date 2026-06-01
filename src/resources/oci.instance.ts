@@ -31,7 +31,10 @@ export class OracleInstance extends pulumi.ComponentResource {
         displayName: 'data-volume-01',
         sizeInGbs: '50',
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     const backupVolume = new oci.core.Volume(
@@ -42,7 +45,10 @@ export class OracleInstance extends pulumi.ComponentResource {
         displayName: 'backup-volume-01',
         sizeInGbs: '50',
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     const userData = genCloudInit(`${name}-cloudinit`, args.cloudInitConfig, {
@@ -73,7 +79,14 @@ export class OracleInstance extends pulumi.ComponentResource {
           user_data: userData,
         },
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+        // cloud-init user_data is gzipped base64. Because gzip compression is non-deterministic 
+        // (embeds OS/timestamps), the payload hash changes dynamically, causing Pulumi to trigger 
+        // an instance replacement despite identical YAML output. Ignore to prevent recreation.
+        ignoreChanges: ['metadata'],
+      }
     )
 
     const dataVolumeAttachment = new oci.core.VolumeAttachment(
@@ -84,7 +97,10 @@ export class OracleInstance extends pulumi.ComponentResource {
         attachmentType: 'paravirtualized',
         device: '/dev/oracleoci/oraclevdb',
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     const backupVolumeAttachment = new oci.core.VolumeAttachment(
@@ -96,7 +112,10 @@ export class OracleInstance extends pulumi.ComponentResource {
         device: '/dev/oracleoci/oraclevdc',
         isShareable: true,
       },
-      { parent: this }
+      {
+        parent: this,
+        aliases: [{ parent: pulumi.rootStackResource }],
+      }
     )
 
     this.publicIp = instance.publicIp

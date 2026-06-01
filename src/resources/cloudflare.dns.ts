@@ -29,10 +29,13 @@ export class DnsRecords extends pulumi.ComponentResource {
           content: record.content as pulumi.Output<string>,
           zoneId: record.zoneId,
           proxied: false,
-          comment: '[Pulumi] Generated',
+          comment: '[Terraform] Generated',
           ttl: 3600,
         },
-        { parent: this }
+        {
+          parent: this,
+          aliases: [{ parent: pulumi.rootStackResource }],
+        }
       )
     })
 
