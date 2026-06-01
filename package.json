@@ -8,7 +8,8 @@
     "preview": "pulumi preview",
     "test": "bun test",
     "up": "pulumi up",
-    "output": "pulumi stack output --json > output.json"
+    "output": "pulumi stack output --json > output.json",
+    "import-commands": "bun run scripts/print-import-commands.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.16",

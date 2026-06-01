@@ -2,9 +2,10 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    "types": ["bun"],
     "moduleResolution": "bundler",
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "scripts/**/*.ts"]
 }
