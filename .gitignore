@@ -4,3 +4,6 @@
 
 # Antigravity CLI
 .antigravitycli/
+
+# Environment variables
+.env
