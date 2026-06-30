@@ -1,0 +1,8 @@
+services:
+  webrcade:
+    image: webrcade/webrcade:latest
+    ports:
+      - 8080:80
+    restart: unless-stopped
+    volumes:
+      - /data/webrcade:/var/www/html/content

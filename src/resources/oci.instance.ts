@@ -82,8 +82,8 @@ export class OracleInstance extends pulumi.ComponentResource {
       {
         parent: this,
         aliases: [{ parent: pulumi.rootStackResource }],
-        // cloud-init user_data is gzipped base64. Because gzip compression is non-deterministic 
-        // (embeds OS/timestamps), the payload hash changes dynamically, causing Pulumi to trigger 
+        // cloud-init user_data is gzipped base64. Because gzip compression is non-deterministic
+        // (embeds OS/timestamps), the payload hash changes dynamically, causing Pulumi to trigger
         // an instance replacement despite identical YAML output. Ignore to prevent recreation.
         ignoreChanges: ['metadata'],
       }

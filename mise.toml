@@ -1,0 +1,75 @@
+[tools]
+bun = "1"
+node = "lts"
+pulumi = "latest"
+
+[tasks.list]
+description = "List all available stacks"
+run = "pulumi stack ls"
+
+[tasks.output]
+description = "View outputs"
+run = "pulumi stack output --json --show-secrets > output.json"
+
+[tasks.deploy]
+description = "Deploy all stacks"
+confirm = """🚨 This will deploy all stacks. Are you sure?
+
+💡 You can also deploy a specific stack using `mise run deploy:stack <stack-name>`"""
+run = "pulumi up"
+
+[tasks."deploy:stack"]
+description = "Deploy a specific stack (auto-approve)"
+usage = 'arg "<stack>" help="Stack name to deploy"'
+run = "pulumi up --stack ${usage_stack?} -y"
+
+[tasks.cost]
+description = "Breakdown costs using infracost.io"
+run = [
+  "pulumi preview --json --save-to .pulumi-preview.json",
+  "infracost breakdown --path .pulumi-preview.json",
+]
+
+[tasks."app:_with_secrets"]
+hide = true
+run = [
+  'ssh $SSH_TARGET "mkdir -p $APP_TARGET"',
+  "doppler secrets download -p $DOPPER_PROJECT -c $DOPPER_CONFIG --no-file --format env > $APP_DIR.env",
+  "rsync -avz --progress --delete $APP_DIR $SSH_TARGET:$APP_TARGET",
+  "rm $APP_DIR.env",
+  'ssh $SSH_TARGET "cd $APP_TARGET && docker compose up -d --remove-orphans --pull=always"',
+]
+
+[tasks."app:_deploy"]
+hide = true
+run = [
+  'ssh $SSH_TARGET "mkdir -p $APP_TARGET"',
+  "rsync -avz --progress --delete $APP_DIR $SSH_TARGET:$APP_TARGET",
+  'ssh $SSH_TARGET "cd $APP_TARGET && docker compose up -d --remove-orphans --pull=always"',
+]
+
+[tasks."app-netdata"]
+description = "Deploy App NetData"
+depends = [
+  { task = "app:_with_secrets", env = { SSH_TARGET = "t-oracle", APP_DIR = "./projects/netdata/", APP_TARGET = "~/apps/netdata/", DOPPER_PROJECT = "netdata", DOPPER_CONFIG = "prd" } },
+]
+
+[tasks."app-syncthing"]
+description = "Deploy App Syncthing"
+depends = [
+  { task = "app:_deploy", env = { SSH_TARGET = "t-oracle", APP_DIR = "./projects/syncthing/", APP_TARGET = "~/apps/syncthing/" } },
+]
+
+[tasks."app-netdata-darkhorn"]
+description = "Deploy App NetData on DarkHorn"
+depends = [
+  { task = "app:_with_secrets", env = { SSH_TARGET = "100.72.200.70", APP_DIR = "./projects/netdata/", APP_TARGET = "~/apps/netdata/", DOPPER_PROJECT = "netdata", DOPPER_CONFIG = "prd" } },
+]
+
+[tasks."host:update"]
+description = "SSH to a host and run full system update including Docker engine"
+usage = '''
+arg "<host>" help="SSH target (SSH config alias or user@host)" env="SSH_TARGET"
+'''
+confirm = "Run full system update (including Docker) on {{ usage.host }}?"
+run = "bun run scripts/host-system-update.ts ${usage_host?}"
