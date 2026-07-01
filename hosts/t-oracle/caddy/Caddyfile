@@ -18,5 +18,13 @@ coralhub.toan.io {
 }
 
 coralhub-api.toan.io {
-	reverse_proxy :22022
+	reverse_proxy :22022 {
+		# Don't buffer SSE chunks
+		flush_interval -1
+
+		transport http {
+			read_timeout 10m
+			write_timeout 10m
+		}
+	}
 }
