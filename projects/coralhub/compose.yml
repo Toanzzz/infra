@@ -77,7 +77,7 @@ services:
       - PORT=22025
       - HOST=0.0.0.0
       - API_BASE_URL=http://api:22022
-      - VITE_PUBLIC_API_URL=https://coralhub-api.toan.io
+      - PUBLIC_API_URL=https://coralhub-api.toan.io
       # Connection string for the bundled PostgreSQL service.
       - DATABASE_URL=postgres://coralhub:coralhub@db/coralhub
     depends_on: [ api ]
