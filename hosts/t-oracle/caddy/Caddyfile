@@ -14,6 +14,15 @@ mup.vn {
 }
 
 coralhub.toan.io {
+	handle /api/* {
+		reverse_proxy :22022 {
+			flush_interval -1
+			transport http {
+				read_timeout 10m
+				write_timeout 10m
+			}
+		}
+	}
 	reverse_proxy :22025
 }
 
