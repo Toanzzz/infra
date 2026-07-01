@@ -1,0 +1,86 @@
+# ==============================================================================
+# CoralHub - Docker Compose Configuration
+# ==============================================================================
+#
+# What is this?
+#   This file defines the Docker Compose setup for running CoralHub—a self-hosted,
+#   OpenAI-compatible AI router and local management dashboard.
+#
+# How to use:
+#   1. Start the service in the background:
+#      $ docker compose up -d
+#
+#   2. View real-time logs:
+#      $ docker compose logs -f
+#
+#   3. Stop the service:
+#      $ docker compose down
+#
+#   4. Rebuild and restart after source code changes:
+#      $ docker compose up -d --build
+#
+#   5. Run ONLY the PostgreSQL database (for local development):
+#      $ docker compose --profile local-dev up -d
+#
+# Configuration & Security:
+#   - By default, the API router runs on port 22022, and the web dashboard runs on port 22024.
+#   - Access the dashboard in your browser: http://localhost:22024
+#   - View the interactive API docs (Scalar) at: http://localhost:22022/scalar
+#   - If exposed to the network (HOST=0.0.0.0), the router refuses to start unless
+#     both ADMIN_USER and ADMIN_PASS are configured. Please change the default
+#     credentials below to protect your dashboard.
+#   - The PostgreSQL database is persisted in the `coralhub-pgdata` volume.
+#   - Application data (backups and request logs) is persisted in the
+#     `coralhub-data` volume.
+#   - Change POSTGRES_PASSWORD (and the matching DATABASE_URL) before exposing
+#     this beyond your machine.
+#
+# ==============================================================================
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports: [ 127.0.0.1:22023:5432 ]
+    environment:
+      - POSTGRES_DB=coralhub
+      - POSTGRES_USER=coralhub
+      - POSTGRES_PASSWORD=coralhub
+    volumes: [db-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U coralhub -d coralhub" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ghcr.io/nerd-coder/coralhub-api
+    ports: [ "127.0.0.1:22022:22022" ]
+    environment:
+      - PORT=22022
+      - HOST=0.0.0.0
+      - ADMIN_USER=coralhub
+      - ADMIN_PASS=coralhub
+      # Local compose secret for Better Auth cookie/session signing.
+      # Replace this before exposing the service beyond localhost.
+      - BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
+      # Connection string for the bundled PostgreSQL service.
+      - DATABASE_URL=postgres://coralhub:coralhub@db/coralhub
+    volumes: [data:/app/data]
+    depends_on: { db: { condition: service_healthy } }
+
+  web:
+    image: ghcr.io/nerd-coder/coralhub-web
+    ports: [ "127.0.0.1:22025:22025" ]
+    environment:
+      - PORT=22025
+      - HOST=0.0.0.0
+      - API_BASE_URL=http://api:22022
+      - VITE_PUBLIC_PROXY_ENDPOINT_URL=https://coralhub-api.toan.io
+      # Connection string for the bundled PostgreSQL service.
+      - DATABASE_URL=postgres://coralhub:coralhub@db/coralhub
+    depends_on: [ api ]
+
+volumes:
+  data:
+  db-data:

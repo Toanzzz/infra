@@ -1,0 +1,22 @@
+games.ngao.vn {
+	basic_auth {
+		toan $2a$14$1wBSoVS4dMn68jWrBtQET.fmafo5zFkn1/R6mXRhlD6RS7FwoT0xS
+	}
+	reverse_proxy :8080
+}
+
+sync.toan.io {
+	reverse_proxy :8384
+}
+
+mup.vn {
+	reverse_proxy :3000
+}
+
+coralhub.toan.io {
+	reverse_proxy :22025
+}
+
+coralhub-api.toan.io {
+	reverse_proxy :22022
+}
