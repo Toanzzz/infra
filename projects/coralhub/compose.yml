@@ -59,6 +59,7 @@ services:
     environment:
       - PORT=22022
       - HOST=0.0.0.0
+      - LOG_LEVEL=info
       - ADMIN_USER=coralhub
       - ADMIN_PASS=coralhub
       # Local compose secret for Better Auth cookie/session signing.
