@@ -14,16 +14,16 @@
     "import-commands": "bun run scripts/print-import-commands.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.1",
+    "@biomejs/biome": "2.5.2",
     "@types/bun": "^1.3.14",
-    "@types/node": "^25.9.1",
+    "@types/node": "^26.1.0",
     "typescript": "^6.0.3"
   },
   "dependencies": {
     "@pulumi/cloudflare": "^6.17.0",
     "@pulumi/cloudinit": "^1.6.0",
-    "@pulumi/oci": "^4.17.0",
-    "@pulumi/pulumi": "^3.248.0",
+    "@pulumi/oci": "^4.18.0",
+    "@pulumi/pulumi": "^3.250.0",
     "liquidjs": "^10.27.1"
   }
 }
