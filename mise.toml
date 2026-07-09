@@ -47,7 +47,7 @@ depends = [
 [tasks."app-coralhub"]
 description = "Deploy App CoralHub"
 depends = [
-  { task = "app:_deploy", env = { SSH_TARGET = "t-oracle", APP_DIR = "./projects/coralhub/", APP_TARGET = "~/apps/coralhub/" } },
+  { task = "app:_with_secrets", env = { SSH_TARGET = "t-oracle", APP_DIR = "./projects/coralhub/", APP_TARGET = "~/apps/coralhub/", DOPPER_PROJECT = "coralhub", DOPPER_CONFIG = "prd" } },
 ]
 
 [tasks."app-netdata-darkhorn"]

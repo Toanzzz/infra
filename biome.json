@@ -9,10 +9,10 @@
     "ignoreUnknown": true,
     "includes": [
       "**",
-      "!bun.lock",
-      "!apps/api/src/db/migrations",
-      "!apps/web/src/routeTree.gen.ts",
-      "!apps/api/src/db/auth-schema.gen.ts"
+      "!!bun.lock",
+      "!!apps/api/src/db/migrations",
+      "!!apps/web/src/routeTree.gen.ts",
+      "!!apps/api/src/db/auth-schema.gen.ts"
     ]
   },
   "formatter": {

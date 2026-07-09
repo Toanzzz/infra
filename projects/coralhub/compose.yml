@@ -1,88 +1,156 @@
 # ==============================================================================
-# CoralHub - Docker Compose Configuration
+# CoralHub - Docker Compose Configuration (production)
 # ==============================================================================
 #
 # What is this?
-#   This file defines the Docker Compose setup for running CoralHub—a self-hosted,
-#   OpenAI-compatible AI router and local management dashboard.
+#   Self-hosted OpenAI-compatible AI router with a management dashboard.
+#   Stack: PostgreSQL, Restate (durable cron/workflows), API, workflows worker, web UI.
 #
 # How to use:
-#   1. Start the service in the background:
+#   1. Start:
 #      $ docker compose up -d
 #
-#   2. View real-time logs:
+#   2. Logs:
 #      $ docker compose logs -f
 #
-#   3. Stop the service:
+#   3. Stop:
 #      $ docker compose down
 #
-#   4. Rebuild and restart after source code changes:
-#      $ docker compose up -d --build
+#   4. Pull newer images and recreate:
+#      $ docker compose pull && docker compose up -d
 #
-#   5. Run ONLY the PostgreSQL database (for local development):
-#      $ docker compose --profile local-dev up -d
+# Ports (localhost only; reverse-proxied by Caddy):
+#   - API:  127.0.0.1:22022  → coralhub-api.toan.io
+#   - Web:  127.0.0.1:22025  → coralhub.toan.io
+#   - Postgres: 127.0.0.1:22023 (optional admin access)
 #
-# Configuration & Security:
-#   - By default, the API router runs on port 22022, and the web dashboard runs on port 22024.
-#   - Access the dashboard in your browser: http://localhost:22024
-#   - View the interactive API docs (Scalar) at: http://localhost:22022/scalar
-#   - If exposed to the network (HOST=0.0.0.0), the router refuses to start unless
-#     both ADMIN_USER and ADMIN_PASS are configured. Please change the default
-#     credentials below to protect your dashboard.
-#   - The PostgreSQL database is persisted in the `coralhub-pgdata` volume.
-#   - Application data (backups and request logs) is persisted in the
-#     `coralhub-data` volume.
-#   - Change POSTGRES_PASSWORD (and the matching DATABASE_URL) before exposing
-#     this beyond your machine.
+# Browser API URL is runtime config on the web container (API_BASE_URL),
+# injected into the page as window.__CORALHUB_PUBLIC__.
+#
+# Secrets (Doppler project `coralhub`, config `prd` → `.env` via mise app:_with_secrets):
+#   CORALHUB_MASTER_KEY   32-byte standard base64
+#   CORALHUB_JWT_SECRET
+#   CORALHUB_API_KEY_PEPPER
+#   POSTGRES_PASSWORD
+#   DATABASE_URL          postgres://coralhub:${POSTGRES_PASSWORD}@postgres:5432/coralhub
+#
+# Images (published on tag push):
+#   ghcr.io/nerd-coder/coralhub-{api,web,workflows,migrate}
 #
 # ==============================================================================
 
+x-coralhub-env: &coralhub-env
+  DATABASE_URL: ${DATABASE_URL}
+  CORALHUB_MASTER_KEY: ${CORALHUB_MASTER_KEY}
+  CORALHUB_JWT_SECRET: ${CORALHUB_JWT_SECRET}
+  CORALHUB_API_KEY_PEPPER: ${CORALHUB_API_KEY_PEPPER}
+
 services:
-  db:
+  postgres:
     image: postgres:17-alpine
     restart: unless-stopped
-    ports: [ 127.0.0.1:22023:5432 ]
+    ports: [ "127.0.0.1:22023:5432" ]
     environment:
-      - POSTGRES_DB=coralhub
-      - POSTGRES_USER=coralhub
-      - POSTGRES_PASSWORD=coralhub
-    volumes: [db-data:/var/lib/postgresql/data]
+      POSTGRES_DB: coralhub
+      POSTGRES_USER: coralhub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U coralhub -d coralhub" ]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+  restate:
+    image: restatedev/restate:latest
+    restart: unless-stopped
+    environment:
+      RESTATE_NODE_NAME: coralhub
+    # Ingress (8080) and admin (9070) stay on the compose network only so they
+    # do not clash with host services (e.g. games on :8080).
+    volumes:
+      - restate-data:/restate-data
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://127.0.0.1:9070/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  migrate:
+    image: ghcr.io/nerd-coder/coralhub-migrate
+    environment:
+      <<: *coralhub-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  workflows:
+    image: ghcr.io/nerd-coder/coralhub-workflows
+    restart: unless-stopped
+    environment:
+      <<: *coralhub-env
+      PORT_WORKFLOWS: 22024
+      # Compose service name (not localhost — localhost is the workflows container itself).
+      RESTATE_INGRESS_URL: http://restate:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  workflows-register:
+    image: curlimages/curl:8.12.1
+    depends_on:
+      workflows:
+        condition: service_started
+      restate:
+        condition: service_healthy
+    entrypoint: [ "/bin/sh", "-ec" ]
+    command:
+      - |
+        echo "registering workflows deployment (cron job virtual objects)..."
+        curl -fsS -X POST http://restate:9070/deployments \
+          -H 'content-type: application/json' \
+          -d '{"uri":"http://workflows:22024"}'
+        echo "workflows (cron jobs) registered"
+    restart: "no"
 
   api:
     image: ghcr.io/nerd-coder/coralhub-api
+    restart: unless-stopped
     ports: [ "127.0.0.1:22022:22022" ]
     environment:
-      - PORT=22022
-      - HOST=0.0.0.0
-      - LOG_LEVEL=info
-      - ADMIN_USER=coralhub
-      - ADMIN_PASS=coralhub
-      # Local compose secret for Better Auth cookie/session signing.
-      # Replace this before exposing the service beyond localhost.
-      - BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET
-      - PUBLIC_URL=https://coralhub.toan.io
-      # Connection string for the bundled PostgreSQL service.
-      - DATABASE_URL=postgres://coralhub:coralhub@db/coralhub
-    volumes: [data:/app/data]
-    depends_on: { db: { condition: service_healthy } }
+      <<: *coralhub-env
+      PORT_API: 22022
+      RESTATE_INGRESS_URL: http://restate:8080
+      # Browser origin for the dashboard (cookie-auth CORS).
+      CORALHUB_CORS_ALLOWED_ORIGINS: https://coralhub.toan.io
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      workflows-register:
+        condition: service_completed_successfully
+      restate:
+        condition: service_healthy
 
   web:
     image: ghcr.io/nerd-coder/coralhub-web
+    restart: unless-stopped
     ports: [ "127.0.0.1:22025:22025" ]
     environment:
-      - PORT=22025
-      - HOST=0.0.0.0
-      - API_BASE_URL=http://api:22022
-      - PUBLIC_API_URL=https://coralhub-api.toan.io
-      # Connection string for the bundled PostgreSQL service.
-      - DATABASE_URL=postgres://coralhub:coralhub@db/coralhub
-    depends_on: [ api ]
+      PORT: 22025
+      HOST: 0.0.0.0
+      # Browser + SSR API origin (public HTTPS hostname, not the docker service name).
+      API_BASE_URL: https://coralhub-api.toan.io
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
-  data:
-  db-data:
+  postgres-data:
+  restate-data:

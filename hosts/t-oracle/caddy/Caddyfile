@@ -13,19 +13,13 @@ mup.vn {
 	reverse_proxy :3000
 }
 
+# Dashboard (web UI on :22025). API/LLM traffic is on coralhub-api.toan.io.
 coralhub.toan.io {
-	handle /api/* {
-		reverse_proxy :22022 {
-			flush_interval -1
-			transport http {
-				read_timeout 10m
-				write_timeout 10m
-			}
-		}
-	}
 	reverse_proxy :22025
 }
 
+# Public OpenAI/Anthropic-compatible API + full management surface (:22022).
+# Long timeouts for streaming chat completions.
 coralhub-api.toan.io {
 	reverse_proxy :22022 {
 		# Don't buffer SSE chunks
