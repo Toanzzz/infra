@@ -54,8 +54,7 @@ services:
       POSTGRES_DB: coralhub
       POSTGRES_USER: coralhub
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+    volumes: [ "postgres-data:/var/lib/postgresql/data" ]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U coralhub -d coralhub" ]
       interval: 5s
@@ -70,8 +69,7 @@ services:
     # Ingress (8080) and admin (9070) stay on the compose network only so they
     # do not clash with host services (e.g. games on :8080).
     ports: [ "127.0.0.1:22026:9070" ]
-    volumes:
-      - restate-data:/restate-data
+    volumes: [ "restate-data:/restate-data" ]
     healthcheck:
       test: [ "CMD", "curl", "-fsS", "http://127.0.0.1:9070/health" ]
       interval: 5s
@@ -84,8 +82,7 @@ services:
     environment:
       <<: *coralhub-env
     depends_on:
-      postgres:
-        condition: service_healthy
+      postgres: { condition: service_healthy }
     restart: "no"
 
   workflows:
@@ -97,25 +94,22 @@ services:
       # Compose service name (not localhost — localhost is the workflows container itself).
       RESTATE_INGRESS_URL: http://restate:8080
     depends_on:
-      postgres:
-        condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
+      postgres: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+      restate: { condition: service_healthy }
 
   workflows-register:
     image: curlimages/curl:8.12.1
     depends_on:
-      workflows:
-        condition: service_started
-      restate:
-        condition: service_healthy
+      workflows: { condition: service_started }
+      restate: { condition: service_healthy }
     entrypoint: [ "/bin/sh", "-ec" ]
     command:
       - |
         echo "registering workflows deployment (cron job virtual objects)..."
         curl -fsS -X POST http://restate:9070/deployments \
           -H 'content-type: application/json' \
-          -d '{"uri":"http://workflows:22024"}'
+          -d '{"uri":"http://workflows:22024","force":true}'
         echo "workflows (cron jobs) registered"
     restart: "no"
 
@@ -130,14 +124,10 @@ services:
       # Browser origin for the dashboard (cookie-auth CORS).
       CORALHUB_CORS_ALLOWED_ORIGINS: https://coralhub.toan.io
     depends_on:
-      postgres:
-        condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
-      workflows-register:
-        condition: service_completed_successfully
-      restate:
-        condition: service_healthy
+      postgres: { condition: service_healthy }
+      restate: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+      workflows-register: { condition: service_completed_successfully }
 
   web:
     image: ghcr.io/nerd-coder/coralhub-web
@@ -149,8 +139,7 @@ services:
       # Browser + SSR API origin (public HTTPS hostname, not the docker service name).
       API_BASE_URL: https://coralhub-api.toan.io
     depends_on:
-      api:
-        condition: service_healthy
+      api: { condition: service_healthy }
 
 volumes:
   postgres-data:
