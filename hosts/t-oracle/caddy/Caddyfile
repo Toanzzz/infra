@@ -31,3 +31,7 @@ coralhub-api.toan.io {
 		}
 	}
 }
+
+coralhub-restate.toan.io {
+	reverse_proxy :22026
+}
