@@ -6,6 +6,7 @@ export interface DnsRecordArgs {
   name: string
   type: string
   content: pulumi.Input<string>
+  proxied: boolean
 }
 
 export interface DnsRecordsArgs {
@@ -28,7 +29,7 @@ export class DnsRecords extends pulumi.ComponentResource {
           type: record.type,
           content: record.content as pulumi.Output<string>,
           zoneId: record.zoneId,
-          proxied: false,
+          proxied: record.proxied,
           comment: '[Terraform] Generated',
           ttl: 3600,
         },

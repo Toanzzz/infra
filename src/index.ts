@@ -55,24 +55,28 @@ new DnsRecords('cloudflare-dns', {
       name: 'oracle',
       content: instance.publicIp,
       type: 'A',
+      proxied: false,
     },
     {
       zoneId: ToanCloudflareZones['toan.io'],
       name: 'sync',
       content: instance.publicIp,
       type: 'A',
+      proxied: false,
     },
     {
       zoneId: ToanCloudflareZones['ngao.vn'],
       name: 'games',
       content: instance.publicIp,
       type: 'A',
+      proxied: false,
     },
     {
       zoneId: ToanCloudflareZones['mup.vn'],
       name: '@',
       content: instance.publicIp,
       type: 'A',
+      proxied: false,
     },
   ],
 })
