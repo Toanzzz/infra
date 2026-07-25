@@ -68,7 +68,7 @@ Cloudflare API token permissions should be configured in the Cloudflare dashboar
 
 | Scope | Resource | Access Level | Reason |
 |-------|----------|--------------|--------|
-| Zone | DNS | Read/Write | Manage DNS A records to route traffic for configured domains (`toan.io`, `ngao.vn`, etc.) to the Oracle instance's public IP. |
+| Zone | DNS | Read/Write | Manage DNS A/AAAA records to route traffic for configured domains (`toan.io`, `ngao.vn`, etc.) to the Oracle instance's public IPs. |
 
 ### 3. Deploy
 

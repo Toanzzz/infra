@@ -57,6 +57,11 @@ export class Vcn extends pulumi.ComponentResource {
             destination: '0.0.0.0/0',
             destinationType: 'CIDR_BLOCK',
           },
+          {
+            networkEntityId: ig.id,
+            destination: '::/0',
+            destinationType: 'CIDR_BLOCK',
+          },
         ],
       },
       {
@@ -77,6 +82,12 @@ export class Vcn extends pulumi.ComponentResource {
             destination: '0.0.0.0/0',
             destinationType: 'CIDR_BLOCK',
             description: 'Allow all outbound traffic',
+          },
+          {
+            protocol: 'all',
+            destination: '::/0',
+            destinationType: 'CIDR_BLOCK',
+            description: 'Allow all outbound IPv6 traffic',
           },
         ],
         ingressSecurityRules: [
@@ -114,6 +125,50 @@ export class Vcn extends pulumi.ComponentResource {
             sourceType: 'CIDR_BLOCK',
             udpOptions: { max: 22000, min: 22000 },
             description: 'Allow Syncthing UDP file transfers from anywhere',
+          },
+          {
+            protocol: '58', // ICMPv6
+            source: '::/0',
+            sourceType: 'CIDR_BLOCK',
+            description:
+              'Allow ICMPv6 from anywhere (required for IPv6 PMTU discovery)',
+          },
+          {
+            protocol: '6', // TCP
+            source: '::/0',
+            sourceType: 'CIDR_BLOCK',
+            tcpOptions: { max: 22, min: 22 },
+            description: 'Allow SSH from anywhere over IPv6',
+          },
+          {
+            protocol: '6', // TCP
+            source: '::/0',
+            sourceType: 'CIDR_BLOCK',
+            tcpOptions: { max: 80, min: 80 },
+            description: 'Allow HTTP from anywhere over IPv6',
+          },
+          {
+            protocol: '6', // TCP
+            source: '::/0',
+            sourceType: 'CIDR_BLOCK',
+            tcpOptions: { max: 443, min: 443 },
+            description: 'Allow HTTPS from anywhere over IPv6',
+          },
+          {
+            protocol: '6', // TCP
+            source: '::/0',
+            sourceType: 'CIDR_BLOCK',
+            tcpOptions: { max: 22000, min: 22000 },
+            description:
+              'Allow Syncthing TCP file transfers from anywhere over IPv6',
+          },
+          {
+            protocol: '17', // UDP
+            source: '::/0',
+            sourceType: 'CIDR_BLOCK',
+            udpOptions: { max: 22000, min: 22000 },
+            description:
+              'Allow Syncthing UDP file transfers from anywhere over IPv6',
           },
         ],
       },

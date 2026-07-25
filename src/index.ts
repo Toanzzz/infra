@@ -44,6 +44,7 @@ const instance = new OracleInstance(
 
 // Export Instance Outputs
 export const publicIp = instance.publicIp
+export const publicIpv6 = instance.publicIpv6
 export const dataVolumeDevice = instance.dataVolumeDevice
 export const backupVolumeDevice = instance.backupVolumeDevice
 
@@ -76,6 +77,34 @@ new DnsRecords('cloudflare-dns', {
       name: '@',
       content: instance.publicIp,
       type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['toan.io'],
+      name: 'oracle',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['toan.io'],
+      name: 'sync',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['ngao.vn'],
+      name: 'games',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['mup.vn'],
+      name: '@',
+      content: instance.publicIpv6,
+      type: 'AAAA',
       proxied: false,
     },
   ],

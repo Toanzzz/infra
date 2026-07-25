@@ -13,6 +13,7 @@ export interface OracleInstanceArgs {
 
 export class OracleInstance extends pulumi.ComponentResource {
   public readonly publicIp: pulumi.Output<string>
+  public readonly publicIpv6: pulumi.Output<string>
   public readonly dataVolumeDevice: pulumi.Output<string>
   public readonly backupVolumeDevice: pulumi.Output<string>
 
@@ -118,7 +119,25 @@ export class OracleInstance extends pulumi.ComponentResource {
       }
     )
 
+    // The VNIC's public IPv6 is assigned out-of-band (OCI console), so look it
+    // up via data sources instead of managing the address resource directly.
+    const vnicAttachments = oci.core.getVnicAttachmentsOutput(
+      {
+        compartmentId: args.compartmentId,
+        instanceId: instance.id,
+      },
+      { parent: this }
+    )
+
+    const vnic = vnicAttachments.apply((attachments) =>
+      oci.core.getVnicOutput(
+        { vnicId: attachments.vnicAttachments[0]?.vnicId ?? '' },
+        { parent: this }
+      )
+    )
+
     this.publicIp = instance.publicIp
+    this.publicIpv6 = vnic.apply((v) => v.ipv6addresses[0] ?? '')
     this.dataVolumeDevice = dataVolumeAttachment.device.apply((d) => d ?? '')
     this.backupVolumeDevice = backupVolumeAttachment.device.apply(
       (d) => d ?? ''
@@ -126,6 +145,7 @@ export class OracleInstance extends pulumi.ComponentResource {
 
     this.registerOutputs({
       publicIp: this.publicIp,
+      publicIpv6: this.publicIpv6,
       dataVolumeDevice: this.dataVolumeDevice,
       backupVolumeDevice: this.backupVolumeDevice,
     })
