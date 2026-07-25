@@ -11,7 +11,8 @@
     "test": "bun test",
     "up": "pulumi up",
     "output": "pulumi stack output --json > output.json",
-    "import-commands": "bun run scripts/print-import-commands.ts"
+    "import-commands": "bun run scripts/print-import-commands.ts",
+    "oci:new-ip": "bun run scripts/oci-reassign-public-ip.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.2",
