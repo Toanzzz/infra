@@ -29,6 +29,7 @@ interface OciItemResponse<T> {
 
 interface Instance {
   id: string
+  'availability-domain': string
   'display-name': string
   'lifecycle-state': string
 }
@@ -116,6 +117,21 @@ function runOci<T>(args: string[]): T {
   }
 }
 
+/**
+ * Runs an OCI CLI list command and returns the `data` array. The OCI CLI
+ * prints nothing at all for an empty list result, so blank output means `[]`.
+ */
+function runOciList<T>(args: string[]): T[] {
+  const output = run('oci', [...args, '--output', 'json'])
+  if (!output) return []
+  try {
+    return (JSON.parse(output) as OciListResponse<T>).data
+  } catch {
+    console.error(styleText('red', 'Error: OCI CLI returned invalid JSON'))
+    process.exit(1)
+  }
+}
+
 /** Gets the configured OCI compartment from the explicit option or Pulumi config. */
 function getCompartmentId(): string {
   if (values['compartment-id']?.trim()) return values['compartment-id'].trim()
@@ -145,7 +161,7 @@ function getInstance(compartmentId: string): Instance {
     ]).data
   }
 
-  const instances = runOci<OciListResponse<Instance>>([
+  const instances = runOciList<Instance>([
     'compute',
     'instance',
     'list',
@@ -156,7 +172,7 @@ function getInstance(compartmentId: string): Instance {
     '--lifecycle-state',
     'RUNNING',
     '--all',
-  ]).data
+  ])
 
   const [instance] = instances
   if (!instance || instances.length !== 1) {
@@ -173,7 +189,7 @@ function getInstance(compartmentId: string): Instance {
 
 /** Finds the target instance's attached primary VNIC. */
 function getVnicId(compartmentId: string, instanceId: string): string {
-  const attachments = runOci<OciListResponse<VnicAttachment>>([
+  const attachments = runOciList<VnicAttachment>([
     'compute',
     'vnic-attachment',
     'list',
@@ -182,7 +198,7 @@ function getVnicId(compartmentId: string, instanceId: string): string {
     '--instance-id',
     instanceId,
     '--all',
-  ]).data.filter((attachment) => attachment['lifecycle-state'] === 'ATTACHED')
+  ]).filter((attachment) => attachment['lifecycle-state'] === 'ATTACHED')
 
   const [attachment] = attachments
   if (!attachment || attachments.length !== 1) {
@@ -199,14 +215,14 @@ function getVnicId(compartmentId: string, instanceId: string): string {
 
 /** Finds the primary private IPv4 address belonging to a VNIC. */
 function getPrimaryPrivateIp(vnicId: string): PrivateIp {
-  const privateIps = runOci<OciListResponse<PrivateIp>>([
+  const privateIps = runOciList<PrivateIp>([
     'network',
     'private-ip',
     'list',
     '--vnic-id',
     vnicId,
     '--all',
-  ]).data
+  ])
   const primary = privateIps.find((privateIp) => privateIp['is-primary'])
   if (!primary) {
     console.error(styleText('red', 'Error: primary private IP not found'))
@@ -215,18 +231,31 @@ function getPrimaryPrivateIp(vnicId: string): PrivateIp {
   return primary
 }
 
-/** Finds the public IPv4 address assigned to a private IP. */
-function getPublicIp(compartmentId: string, privateIpId: string): PublicIp {
-  const publicIps = runOci<OciListResponse<PublicIp>>([
+/**
+ * Finds the public IPv4 address assigned to a private IP. Ephemeral public IPs
+ * assigned to private IPs have scope AVAILABILITY_DOMAIN, so the query must
+ * include the instance's availability domain; a REGION-scoped query only
+ * returns reserved IPs and regional entities such as NAT gateways.
+ */
+function getPublicIp(
+  compartmentId: string,
+  availabilityDomain: string,
+  privateIpId: string
+): PublicIp {
+  const publicIps = runOciList<PublicIp>([
     'network',
     'public-ip',
     'list',
     '--scope',
-    'REGION',
+    'AVAILABILITY_DOMAIN',
+    '--availability-domain',
+    availabilityDomain,
     '--compartment-id',
     compartmentId,
+    '--lifetime',
+    'EPHEMERAL',
     '--all',
-  ]).data
+  ])
   const publicIp = publicIps.find(
     (candidate) => candidate['private-ip-id'] === privateIpId
   )
@@ -299,7 +328,11 @@ const compartmentId = getCompartmentId()
 const instance = getInstance(compartmentId)
 const vnicId = getVnicId(compartmentId, instance.id)
 const privateIp = getPrimaryPrivateIp(vnicId)
-const oldPublicIp = getPublicIp(compartmentId, privateIp.id)
+const oldPublicIp = getPublicIp(
+  compartmentId,
+  instance['availability-domain'],
+  privateIp.id
+)
 
 console.log(
   styleText('cyan', `Instance: ${instance['display-name']} (${instance.id})`)
