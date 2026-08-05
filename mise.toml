@@ -1,7 +1,6 @@
 [tools]
 bun = "1"
 node = "lts"
-pulumi = "latest"
 
 [env]
 _.file = '.env'
