@@ -107,5 +107,33 @@ new DnsRecords('cloudflare-dns', {
       type: 'AAAA',
       proxied: false,
     },
+    {
+      zoneId: ToanCloudflareZones['coralhub.cc'],
+      name: '@',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['coralhub.cc'],
+      name: '@',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['coralhub.cc'],
+      name: 'api',
+      content: 'coralhub.cc',
+      type: 'CNAME',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['coralhub.cc'],
+      name: 'restate',
+      content: 'coralhub.cc',
+      type: 'CNAME',
+      proxied: false,
+    },
   ],
 })

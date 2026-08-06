@@ -1,5 +1,6 @@
 // TypeScript enum is not supported in strip-only mode
 export const ToanCloudflareZones = {
+  'coralhub.cc': '1911bb30575d83f03e105015d21d5789',
   'imtp.work': '420c28c8db47ba3e52b902b31c2eeffa',
   'mup.vn': '7d082a7b2a770348ad458ca61c8b6af9',
   'ngao.vn': '7e8153c1b657e4296ac6178a9bce980b',

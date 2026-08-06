@@ -70,7 +70,7 @@ services:
       RESTATE_ADMIN_URL: http://restate:9070
       RESTATE_WORKFLOWS_URI: http://workflows:22024
       # Browser origin for the dashboard (cookie-auth CORS).
-      CORALHUB_CORS_ALLOWED_ORIGINS: https://coralhub.toan.io
+      CORALHUB_CORS_ALLOWED_ORIGINS: https://coralhub.cc,https://coralhub.toan.io
     depends_on:
       postgres: { condition: service_healthy }
       restate: { condition: service_healthy }
@@ -83,7 +83,7 @@ services:
     ports: [ "127.0.0.1:22025:22025" ]
     environment:
       # Browser + SSR API origin (public HTTPS hostname, not the docker service name).
-      API_BASE_URL: https://coralhub-api.toan.io
+      API_BASE_URL: https://api.coralhub.cc
     depends_on:
       api: { condition: service_healthy }
 
