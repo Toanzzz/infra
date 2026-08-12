@@ -9,6 +9,16 @@ x-coralhub-env: &coralhub-env
   CORALHUB_MASTER_KEY: ${CORALHUB_MASTER_KEY}
   CORALHUB_JWT_SECRET: ${CORALHUB_JWT_SECRET}
   CORALHUB_API_KEY_PEPPER: ${CORALHUB_API_KEY_PEPPER}
+  # Optional Telegram notification channel. Configure both values together.
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+  # Optional SMTP notification channel. Host/from are required together.
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM: ${SMTP_FROM:-}
+  SMTP_TLS_MODE: ${SMTP_TLS_MODE:-}
 
 services:
   postgres:
