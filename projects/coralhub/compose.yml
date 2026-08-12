@@ -60,6 +60,15 @@ services:
       migrate: { condition: service_completed_successfully }
       restate: { condition: service_healthy }
 
+  cli-runtime:
+    image: ghcr.io/nerd-coder/coralhub-cli-runtime
+    restart: unless-stopped
+    environment:
+      CLI_RUNTIME_VALIDATION_ENDPOINT: http://api:22027
+    ports: [ "22028:22028" ]
+    depends_on:
+      api: { condition: service_healthy }
+
   api:
     image: ghcr.io/nerd-coder/coralhub-api
     restart: unless-stopped
@@ -69,8 +78,9 @@ services:
       RESTATE_INGRESS_URL: http://restate:8080
       RESTATE_ADMIN_URL: http://restate:9070
       RESTATE_WORKFLOWS_URI: http://workflows:22024
+      CLI_RUNTIME_ENDPOINT: cli-runtime
       # Browser origin for the dashboard (cookie-auth CORS).
-      CORALHUB_CORS_ALLOWED_ORIGINS: https://coralhub.cc,https://coralhub.toan.io
+      CORALHUB_CORS_ALLOWED_ORIGINS: https://coralhub.cc
     depends_on:
       postgres: { condition: service_healthy }
       restate: { condition: service_healthy }
