@@ -72,6 +72,8 @@ services:
     restart: unless-stopped
     environment:
       <<: *coralhub-env
+      RESTATE_INGRESS_URL: http://restate:8080
+      RESTATE_ADMIN_URL: http://restate:9070
     depends_on:
       postgres: { condition: service_healthy }
       migrate: { condition: service_completed_successfully }
