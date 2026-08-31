@@ -31,6 +31,16 @@ Upstreams are addressed one of two ways, chosen per site in the Caddyfile:
 compose registers the bare service name too, so an unprefixed name collides as soon as a second
 stack joins with the same service name, and the proxy silently round-robins between them.
 
+## Application deploys
+
+`projects/<app>/` holds compose files deployed by the `app-*` tasks. CoralHub is the exception: its
+compose file lives in the [coralhub repo](https://github.com/nerd-coder/coralhub) and is deployed
+from there. Only its secrets are managed here:
+
+```sh
+mise run secrets-coralhub    # Doppler -> t-oracle:~/apps/coralhub/.env
+```
+
 ## Commands
 
 Run these from the infra directory:
