@@ -1,0 +1,62 @@
+# Edge proxy. Terminates TLS and fronts everything on the host.
+#
+# Deployed with `mise run host:sync-caddy <host>`, which ships this file plus
+# that host's Caddyfile and reloads without dropping connections.
+#
+# Upstreams can be addressed two ways, and the Caddyfile picks per site:
+#
+#   edge network    reverse_proxy <service>:<port>, or a `dynamic a` block
+#                   resolving through 127.0.0.11 when the upstream is scaled
+#                   and its address set changes. Requires the target to join
+#                   `edge`. This is the only way to reach a container that
+#                   publishes no host port.
+#
+#   host port       host.docker.internal:<port>, for anything running on the
+#                   host or in a stack not joined to `edge`. Works only if the
+#                   port is published on 0.0.0.0 — a 127.0.0.1-only publish is
+#                   not reachable from in here.
+name: caddy
+
+services:
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [edge]
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  # Shared with any stack that wants to be routable by service name.
+  # Create once: docker network create edge
+  edge:
+    external: true
+    name: edge
+
+volumes:
+  # ACME account and issued certificates. External so `docker compose down -v`
+  # cannot delete the cert store and force a re-issue against rate limits.
+  # Create on a fresh host: docker volume create caddy_caddy-data
+  caddy-data:
+    external: true
+    name: caddy_caddy-data
+  # Autosaved config; disposable.
+  caddy-config:

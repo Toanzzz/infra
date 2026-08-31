@@ -64,7 +64,7 @@ confirm = "Run full system update (including Docker) on {{ usage.host }}?"
 run = "bun run scripts/host-system-update.ts ${usage_host?}"
 
 [tasks."host:sync-caddy"]
-description = "Sync Caddyfile to a host and restart Caddy"
+description = "Sync the Caddy stack to a host and reload it"
 usage = '''
 arg "<host>" help="SSH target (SSH config alias or user@host)" env="SSH_TARGET"
 '''

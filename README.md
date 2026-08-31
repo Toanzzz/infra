@@ -8,6 +8,29 @@ This stack provisions Oracle Cloud (OCI) resources (a VCN and a free-tier instan
 
 The default OCI shape utilizes the Oracle Cloud "Always Free" tier where possible. The instance is configured with cloud-init to mount multiple block volumes (`/data` and `/backup`) for persistent storage, using your configured SSH keys for access.
 
+## Edge proxy
+
+Caddy runs as a container (`projects/caddy/compose.yml`) and fronts everything on the host.
+
+```sh
+mise run host:sync-caddy t-oracle
+```
+
+That ships the compose file plus `hosts/<host>/caddy/Caddyfile`, validates the config on the host,
+and applies it with `caddy reload` so in-flight requests survive.
+
+Upstreams are addressed one of two ways, chosen per site in the Caddyfile:
+
+| Target | Address as | Requires |
+|---|---|---|
+| Container on the `edge` network | `<service>:<port>`, or a `dynamic a` block when the upstream is scaled during deploys | The stack joins `edge` |
+| Host port | `host.docker.internal:<port>` | Published on `0.0.0.0`; a `127.0.0.1`-only publish is unreachable |
+
+`edge` is shared by every stack that wants to be routable by name, and is created once with
+`docker network create edge`. Prefix service aliases with the stack name (`coralhub-api`, not `api`):
+compose registers the bare service name too, so an unprefixed name collides as soon as a second
+stack joins with the same service name, and the proxy silently round-robins between them.
+
 ## Commands
 
 Run these from the infra directory:
