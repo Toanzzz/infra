@@ -9,7 +9,6 @@ const engine = new Liquid()
 export interface CloudInitConfig {
   main?: { SSH_KEYS: string[]; FILES?: { path: string; content: string }[] }
   mounts?: { MOUNTS: { name: string; path: string }[] }
-  caddy?: boolean
   firewallOff?: boolean
   installDocker?: boolean
 }
@@ -45,15 +44,6 @@ export function genCloudInit(
       filename: 'cloudinit-mounts.yaml',
       contentType: 'text/cloud-config',
       content: renderTemplate('cloudinit-mounts', config.mounts),
-      mergeType: 'list(append)+dict(no_replace,recurse_list)',
-    })
-  }
-
-  if (config.caddy) {
-    parts.push({
-      filename: 'install-caddy.yaml',
-      contentType: 'text/cloud-config',
-      content: renderTemplate('install-caddy', {}),
       mergeType: 'list(append)+dict(no_replace,recurse_list)',
     })
   }

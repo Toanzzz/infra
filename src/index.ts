@@ -34,7 +34,6 @@ const instance = new OracleInstance(
           { name: 'oracleoci/oraclevdc', path: '/backup' },
         ],
       },
-      caddy: false,
       firewallOff: false,
       installDocker: false,
     },
