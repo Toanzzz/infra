@@ -1,41 +1,98 @@
+# t-oracle sites. Deploy with: mise run host:sync-caddy t-oracle
+#
+# Upstream addressing (see projects/caddy/compose.yml):
+#   <service>:<port>              container on the `edge` network
+#   host.docker.internal:<port>   host port, published on 0.0.0.0
+#
+# Names on `edge` are prefixed with their stack (coralhub-api, not api).
+# Compose registers the bare service name as an alias too, so an unprefixed
+# name collides the moment a second stack joins with the same service name:
+# Docker DNS returns both containers and this proxy round-robins across two
+# applications, silently.
+
+# Load balancing for upstreams whose address set changes while they are being
+# replaced. Active health checks do not run against dynamic upstreams, so health
+# is passive; lb_try_duration is off by default and is what converts a refused
+# connection to a retiring container into a retry rather than a 502.
+(rolling_upstream) {
+	lb_policy       least_conn
+	lb_try_duration 10s
+	lb_try_interval 250ms
+	fail_duration   10s
+	max_fails       1
+}
+
 games.ngao.vn {
 	basic_auth {
 		toan $2a$14$1wBSoVS4dMn68jWrBtQET.fmafo5zFkn1/R6mXRhlD6RS7FwoT0xS
 	}
-	reverse_proxy :8080
+	reverse_proxy host.docker.internal:8080
 }
 
 sync.toan.io {
-	reverse_proxy :8384
+	reverse_proxy host.docker.internal:8384
 }
 
 mup.vn {
-	reverse_proxy :3000
+	reverse_proxy host.docker.internal:3000
 }
 
-# Dashboard (web UI on :22025). API/LLM traffic is on api.coralhub.cc.
+# --- coralhub ----------------------------------------------------------------
+# api and web publish no host port; they are scaled during deploys, so they are
+# resolved by DNS on every refresh rather than pinned to one container address.
+
 coralhub.cc {
-	reverse_proxy :22025
+	reverse_proxy {
+		dynamic a {
+			name      coralhub-web
+			port      22025
+			# Must stay below the deploy's post-health settle time so a new
+			# replica joins the pool before the old one stops. Default is 1m.
+			refresh   2s
+			resolvers 127.0.0.11
+			versions  ipv4
+		}
+		import rolling_upstream
+	}
 }
 
 coralhub.toan.io {
 	redir https://coralhub.cc{uri} 302
 }
 
-# Public OpenAI/Anthropic-compatible API + full management surface (:22022).
+# Public OpenAI/Anthropic-compatible API + full management surface.
 # Long timeouts for streaming chat completions.
 api.coralhub.cc, coralhub-api.toan.io {
-	reverse_proxy :22022 {
+	reverse_proxy {
+		dynamic a {
+			name      coralhub-api
+			port      22022
+			refresh   2s
+			resolvers 127.0.0.11
+			versions  ipv4
+		}
+		import rolling_upstream
+
 		# Don't buffer SSE chunks
 		flush_interval -1
 
 		transport http {
 			read_timeout 10m
 			write_timeout 10m
+			# No pooling: a pooled connection can be written to just as the
+			# container holding it is closing during a replacement.
+			keepalive off
 		}
 	}
 }
 
+# Restate's admin API has no authentication of its own — anyone who reaches it
+# can register deployments and cancel invocations. This is the only thing in
+# front of it. Give it its own credential:
+#   docker compose -f ~/apps/caddy/compose.yml exec caddy caddy hash-password
 restate.coralhub.cc, coralhub-restate.toan.io {
-	reverse_proxy :22026
+	basic_auth {
+		toan $2a$14$1wBSoVS4dMn68jWrBtQET.fmafo5zFkn1/R6mXRhlD6RS7FwoT0xS
+	}
+	reverse_proxy coralhub-restate:9070
 }
