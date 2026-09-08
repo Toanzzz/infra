@@ -92,7 +92,7 @@ api.coralhub.cc, coralhub-api.toan.io {
 #   docker compose -f ~/apps/caddy/compose.yml exec caddy caddy hash-password
 restate.coralhub.cc, coralhub-restate.toan.io {
 	basic_auth {
-		toan $2a$14$1wBSoVS4dMn68jWrBtQET.fmafo5zFkn1/R6mXRhlD6RS7FwoT0xS
+		toan $2a$14$DG6n82ANlwFDhcdiZfy/g.e9vj7acpr8S0B7TgtqlkfA5utxYHXlK
 	}
 	reverse_proxy coralhub-restate:9070
 }
