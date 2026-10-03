@@ -96,3 +96,29 @@ restate.coralhub.cc, coralhub-restate.toan.io {
 	}
 	reverse_proxy coralhub-restate:9070
 }
+
+# --- mira-engine -------------------------------------------------------------
+# Rolled by docker-rollout like coralhub, so the same dynamic upstream. The
+# upstream name is the explicit `mira-engine` alias on `edge`. A reading holds
+# the connection open for the model calls behind it, hence the long timeouts.
+
+mira.imtp.work {
+	basic_auth {
+		mira $2a$14$M77t/z0cUIDt1V7JKd1H1ehojFrNaBfuYMkM8Nnq19CPcW0fa47pG
+	}
+	reverse_proxy {
+		dynamic a {
+			name      mira-engine
+			port      58000
+			refresh   2s
+			resolvers 127.0.0.11
+			versions  ipv4
+		}
+		import rolling_upstream
+
+		transport http {
+			read_timeout 3m
+			write_timeout 3m
+		}
+	}
+}

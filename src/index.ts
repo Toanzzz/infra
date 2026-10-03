@@ -134,5 +134,19 @@ new DnsRecords('cloudflare-dns', {
       type: 'CNAME',
       proxied: false,
     },
+    {
+      zoneId: ToanCloudflareZones['imtp.work'],
+      name: 'mira',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['imtp.work'],
+      name: 'mira',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
   ],
 })
