@@ -66,6 +66,7 @@ export class OracleInstance extends pulumi.ComponentResource {
         sourceDetails: {
           sourceType: 'image',
           sourceId: args.imageId,
+          bootVolumeSizeInGbs: '100',
         },
         createVnicDetails: {
           subnetId: args.subnetId,
