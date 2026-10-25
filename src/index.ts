@@ -148,5 +148,19 @@ new DnsRecords('cloudflare-dns', {
       type: 'AAAA',
       proxied: false,
     },
+    {
+      zoneId: ToanCloudflareZones['ngao.vn'],
+      name: 'social-indexer-api',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['ngao.vn'],
+      name: 'social-indexer-api',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
   ],
 })

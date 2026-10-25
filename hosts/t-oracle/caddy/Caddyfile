@@ -122,3 +122,26 @@ mira.imtp.work {
 		}
 	}
 }
+
+# --- social-indexer ----------------------------------------------------------
+# Backend API only; the web app is a Cloudflare Worker. Rolled by docker-rollout,
+# so the same dynamic upstream on the explicit `social-indexer-api` alias.
+
+social-indexer-api.ngao.vn {
+	reverse_proxy {
+		dynamic a {
+			name      social-indexer-api
+			port      55001
+			refresh   2s
+			resolvers 127.0.0.11
+			versions  ipv4
+		}
+		import rolling_upstream
+
+		transport http {
+			# No pooling: a pooled connection can be written to just as the
+			# container holding it is closing during a replacement.
+			keepalive off
+		}
+	}
+}

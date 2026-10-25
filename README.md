@@ -33,12 +33,15 @@ stack joins with the same service name, and the proxy silently round-robins betw
 
 ## Application deploys
 
-`projects/<app>/` holds compose files deployed by the `app-*` tasks. CoralHub is the exception: its
-compose file lives in the [coralhub repo](https://github.com/nerd-coder/coralhub) and is deployed
-from there. Only its secrets are managed here:
+`projects/<app>/` holds compose files deployed by the `app-*` tasks. CoralHub and Social Indexer
+are the exceptions: their compose files live in the
+[coralhub](https://github.com/nerd-coder/coralhub) and
+[social-indexer](https://github.com/nerd-coder/social-indexer) repos and are deployed from there.
+Only their secrets are managed here:
 
 ```sh
-mise run secrets-coralhub    # Doppler -> t-oracle:~/apps/coralhub/.env
+mise run secrets-coralhub          # Doppler -> t-oracle:~/apps/coralhub/.env
+mise run secrets-social-indexer    # Doppler -> t-oracle:~/apps/social-indexer/.env
 ```
 
 ## Commands

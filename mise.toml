@@ -55,6 +55,18 @@ run = [
   "rm -f /tmp/coralhub.env",
 ]
 
+# Social Indexer's compose file is owned by the social-indexer repo and deployed
+# from there; only its secrets are managed here.
+[tasks."secrets-social-indexer"]
+description = "Refresh Social Indexer's .env on t-oracle from Doppler"
+run = [
+  'ssh t-oracle "mkdir -p ~/apps/social-indexer"',
+  "doppler secrets download -p social-indexer -c prd --no-file --format env > /tmp/social-indexer.env",
+  # No --delete: the compose file on the host is owned by the social-indexer repo.
+  "rsync -avz /tmp/social-indexer.env t-oracle:~/apps/social-indexer/.env",
+  "rm -f /tmp/social-indexer.env",
+]
+
 [tasks."app-netdata-darkhorn"]
 description = "Deploy App NetData on DarkHorn"
 depends = [
