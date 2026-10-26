@@ -10,3 +10,8 @@ export const ToanCloudflareZones = {
   'truyenhay.tv': '4994890018ba772bcc2d2ea896004a1f',
   'truyentranh.vn': 'd8a4c189e4e84b47110844859077687c',
 } as const
+
+export const NerdCoderCloudflareZones = {
+  'nerdcoder.dev': 'd077134ba69695de326a489dc26102c1',
+  'socom.vn': 'df8823b29695d7c0b4e1aca2667e3a45',
+} as const

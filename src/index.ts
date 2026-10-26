@@ -1,6 +1,9 @@
 import * as oci from '@pulumi/oci'
 import { loadConfig } from './config.ts'
-import { ToanCloudflareZones } from './libs/constants.ts'
+import {
+  NerdCoderCloudflareZones,
+  ToanCloudflareZones,
+} from './libs/constants.ts'
 import { DnsRecords } from './resources/cloudflare.dns.ts'
 import { OracleInstance } from './resources/oci.instance.ts'
 import { Vcn } from './resources/oci.vcn.ts'
@@ -157,6 +160,20 @@ new DnsRecords('cloudflare-dns', {
     },
     {
       zoneId: ToanCloudflareZones['ngao.vn'],
+      name: 'social-indexer-api',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
+    {
+      zoneId: NerdCoderCloudflareZones['nerdcoder.dev'],
+      name: 'social-indexer-api',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: NerdCoderCloudflareZones['nerdcoder.dev'],
       name: 'social-indexer-api',
       content: instance.publicIpv6,
       type: 'AAAA',
