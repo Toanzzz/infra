@@ -13,6 +13,10 @@ run = "pulumi stack ls"
 description = "View outputs"
 run = "pulumi stack output --json --show-secrets > output.json"
 
+[tasks.credentials]
+description = "Walk through Pulumi secret credentials"
+run = "bun run scripts/credentials.ts"
+
 [tasks."app:_with_secrets"]
 hide = true
 run = [

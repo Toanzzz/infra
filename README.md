@@ -82,6 +82,9 @@ pulumi config set toan-infra:oracleImageId <your-image-id>
 
 # Provide your SSH keys (JSON array of strings)
 pulumi config set --path 'toan-infra:sshKeys[0]' "ssh-ed25519 AAAAC3... user@host"
+
+# Guided setup for all Pulumi secrets
+mise run credentials
 ```
 
 ### 2. Provider Permissions
@@ -100,11 +103,47 @@ The user associated with the provided `userOcid` and API key must have permissio
 
 #### Cloudflare (`cloudflare:apiToken`)
 
-Cloudflare API token permissions should be configured in the Cloudflare dashboard.
+The Pulumi stack creates and updates DNS records only. Create one
+**user-owned API token** with access to both Cloudflare accounts used by this
+stack:
+
+- The existing account containing the zones currently managed by this project.
+- NerdCoder account `d6bddb74e0e492ddb7854faeaeca690a`, containing
+  `nerdcoder.dev` and `socom.vn`.
 
 | Scope | Resource | Access Level | Reason |
 |-------|----------|--------------|--------|
-| Zone | DNS | Read/Write | Manage DNS A/AAAA records to route traffic for configured domains (`toan.io`, `ngao.vn`, etc.) to the Oracle instance's public IPs. |
+| Zone | DNS | Write | Create, update, and delete the managed A, AAAA, and CNAME records. |
+
+The `nerdcoder.dev` and `socom.vn` zones are in Cloudflare account
+`d6bddb74e0e492ddb7854faea690a`:
+
+| Zone | Zone ID |
+|---|---|
+| `nerdcoder.dev` | `d077134ba69695de326a489dc26102c1` |
+| `socom.vn` | `df8823b29695d7c0b4e1aca2667e3a45` |
+
+In the token creation form:
+
+1. Select **Zone → DNS → Write**.
+2. Under **Zone Resources**, choose **Specific zone resources**.
+3. Add the existing zones managed by this project from
+   `src/libs/constants.ts`.
+4. Add `nerdcoder.dev` and `socom.vn` under the NerdCoder account
+   `d6bddb74e0e492ddb7854faeaeca690a`.
+5. Leave account-wide, Workers, R2, KV, Pages, SSL, analytics, billing, and
+   user permissions unselected.
+6. Set an expiration date and name it something descriptive, such as
+   `toan-infra-pulumi-dns`.
+
+This pre-fills the correct DNS permission:
+
+- [Create a user-owned DNS Write token](https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22dns%22%2C%22type%22%3A%22edit%22%7D%5D&accountId=%2A&zoneId=all&name=toan-infra-pulumi-dns)
+
+The template starts with all accounts and all zones selected; narrow the
+resource selectors to the zones above in **both accounts** before creating the
+token. Cloudflare template URLs only pre-fill the form and do not create the
+token.
 
 ### 3. Deploy
 
