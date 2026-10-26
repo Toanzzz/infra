@@ -1,6 +1,6 @@
 config:
   cloudflare:apiToken:
-    secure: AAABAB17X1iDCXn784WTn0yYPevSZEuqdrHseBpllunrsiLk0BflF2FQZpZKXYdJJZS9iczM+1p8+sHKvg2Wmg41mhZv12xkMCUbbWkY6UxxJumjtQ==
+    secure: AAABAAgN26rKVermRbRv05uZT7Y4IfWXiah7jWB8EC7ss1M5+UdvVeL5Y2rilI2iITWPVpsJebHglkdvPgk83EYET0abYePdUu6Aw9dZcFYEncPkPw==
   oci:tenancyOcid:
     secure: AAABAJsXfX+FBG/gwedprcehgbf8kPN2d+MjQEw+8Bd8kNctXv3/WvYDzH6Ak8v/T+Aj2ZqevSVx2t9v72MmgIRCqwofewK3TnYbuIaMeUw1+ObjjNQiNqHjyRt57IO36sdlXwJCTChGld+5Evr/
   oci:userOcid:
