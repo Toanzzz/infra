@@ -193,5 +193,19 @@ new DnsRecords('cloudflare-dns', {
       type: 'AAAA',
       proxied: false,
     },
+    {
+      zoneId: ToanCloudflareZones['toan.io'],
+      name: 'shop-watcher-api',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: ToanCloudflareZones['toan.io'],
+      name: 'shop-watcher-api',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
   ],
 })

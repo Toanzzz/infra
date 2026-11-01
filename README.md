@@ -34,10 +34,11 @@ stack joins with the same service name, and the proxy silently round-robins betw
 ## Application deploys
 
 `projects/<app>/` holds compose files deployed by the `app-*` tasks. CoralHub, Social Indexer,
-and Saigon Tour are the exceptions: their compose files live in the
+Saigon Tour and Shop Watcher are the exceptions: their compose files live in the
 [coralhub](https://github.com/nerd-coder/coralhub),
-[social-indexer](https://github.com/nerd-coder/social-indexer), and
-[saigon-tour](https://github.com/Toanzzz/saigon-tour) repos and are deployed from there.
+[social-indexer](https://github.com/nerd-coder/social-indexer),
+[saigon-tour](https://github.com/Toanzzz/saigon-tour), and
+[shop-watcher](https://github.com/nerd-coder/shop-watcher) repos and are deployed from there.
 This repo owns only their Caddy sites and DNS records. CoralHub and Social Indexer secrets are
 managed here:
 
@@ -46,8 +47,8 @@ mise run secrets-coralhub          # Doppler -> t-oracle:~/apps/coralhub/.env
 mise run secrets-social-indexer    # Doppler -> t-oracle:~/apps/social-indexer/.env
 ```
 
-Saigon Tour writes its own host `.env` (`t-oracle:~/apps/saigon-tour/.env`) with
-`bun run credentials` in its repo.
+Saigon Tour and Shop Watcher write their own host `.env` (`t-oracle:~/apps/<app>/.env`) with
+`bun run credentials` in their repos.
 
 ## Commands
 

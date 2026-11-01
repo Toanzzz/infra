@@ -155,3 +155,12 @@ social-indexer-api.ngao.vn, social-indexer-api.nerdcoder.dev {
 saigon-tour-api.toan.io {
 	reverse_proxy saigon-api:58001
 }
+
+# --- shop-watcher ------------------------------------------------------------
+# Backend API only; the web app is a Cloudflare Worker. One replica (it is the
+# only DBOS executor) that the deploy recreates in place, so a static upstream on
+# the explicit `shop-watcher-api` alias.
+
+shop-watcher-api.toan.io {
+	reverse_proxy shop-watcher-api:57001
+}
