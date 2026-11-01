@@ -145,3 +145,13 @@ social-indexer-api.ngao.vn, social-indexer-api.nerdcoder.dev {
 		}
 	}
 }
+
+# --- saigon-tour -------------------------------------------------------------
+# Backend API only; the client is a Cloudflare Worker. One replica that the
+# deploy recreates in place (Colyseus rooms live in process memory), so a static
+# upstream on the explicit `saigon-api` alias. Caddy proxies the Colyseus
+# WebSocket upgrades without extra config.
+
+saigon-tour-api.toan.io {
+	reverse_proxy saigon-api:58001
+}
