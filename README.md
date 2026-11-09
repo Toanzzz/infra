@@ -109,34 +109,40 @@ The user associated with the provided `userOcid` and API key must have permissio
 
 #### Cloudflare (`cloudflare:apiToken`)
 
-The Pulumi stack creates and updates DNS records only. Create one
-**user-owned API token** with access to both Cloudflare accounts used by this
-stack:
+The Pulumi stack creates and updates DNS records and the `www.shopwatcher.org`
+redirect rule. Create one **user-owned API token** with access to both
+Cloudflare accounts used by this stack:
 
 - The existing account containing the zones currently managed by this project.
 - NerdCoder account `d6bddb74e0e492ddb7854faeaeca690a`, containing
-  `nerdcoder.dev` and `socom.vn`.
+  `nerdcoder.dev`, `shopwatcher.org` and `socom.vn`.
 
 | Scope | Resource | Access Level | Reason |
 |-------|----------|--------------|--------|
 | Zone | DNS | Write | Create, update, and delete the managed A, AAAA, and CNAME records. |
+| Zone | Single Redirect | Edit | Manage the `www.shopwatcher.org` → `shopwatcher.org` redirect ruleset. |
 
-The `nerdcoder.dev` and `socom.vn` zones are in Cloudflare account
-`d6bddb74e0e492ddb7854faea690a`:
+The `nerdcoder.dev`, `shopwatcher.org` and `socom.vn` zones are in Cloudflare
+account `d6bddb74e0e492ddb7854faeaeca690a`:
 
 | Zone | Zone ID |
 |---|---|
 | `nerdcoder.dev` | `d077134ba69695de326a489dc26102c1` |
+| `shopwatcher.org` | `39ec835fafff7de71482b2c5f84b9fc9` |
 | `socom.vn` | `df8823b29695d7c0b4e1aca2667e3a45` |
+
+`shopwatcher.org` itself is the shop-watcher web Worker's custom domain, which
+its own `wrangler deploy` creates. This stack owns `api.shopwatcher.org`
+(the Oracle host) and the proxied `www` placeholder the redirect matches.
 
 In the token creation form:
 
-1. Select **Zone → DNS → Write**.
+1. Select **Zone → DNS → Write** and **Zone → Single Redirect → Edit**.
 2. Under **Zone Resources**, choose **Specific zone resources**.
 3. Add the existing zones managed by this project from
    `src/libs/constants.ts`.
-4. Add `nerdcoder.dev` and `socom.vn` under the NerdCoder account
-   `d6bddb74e0e492ddb7854faeaeca690a`.
+4. Add `nerdcoder.dev`, `shopwatcher.org` and `socom.vn` under the NerdCoder
+   account `d6bddb74e0e492ddb7854faeaeca690a`.
 5. Leave account-wide, Workers, R2, KV, Pages, SSL, analytics, billing, and
    user permissions unselected.
 6. Set an expiration date and name it something descriptive, such as

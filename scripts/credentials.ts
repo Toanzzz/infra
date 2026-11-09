@@ -130,8 +130,9 @@ function explainCloudflareToken(): void {
 Cloudflare token requirements:
   - User-owned token
   - Zone → DNS → Write
+  - Zone → Single Redirect → Edit (the www.shopwatcher.org redirect)
   - Select the existing project zones from src/libs/constants.ts
-  - Also select nerdcoder.dev and socom.vn in account
+  - Also select nerdcoder.dev, shopwatcher.org and socom.vn in account
     d6bddb74e0e492ddb7854faeaeca690a
   - Leave Workers, R2, KV, Pages, SSL, analytics, billing, and user scopes off
 

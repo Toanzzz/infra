@@ -31,7 +31,8 @@ export class DnsRecords extends pulumi.ComponentResource {
           zoneId: record.zoneId,
           proxied: record.proxied,
           comment: '[Terraform] Generated',
-          ttl: 3600,
+          // Cloudflare stores proxied records with automatic TTL (1).
+          ttl: record.proxied ? 1 : 3600,
         },
         {
           parent: this,

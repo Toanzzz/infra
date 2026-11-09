@@ -13,5 +13,6 @@ export const ToanCloudflareZones = {
 
 export const NerdCoderCloudflareZones = {
   'nerdcoder.dev': 'd077134ba69695de326a489dc26102c1',
+  'shopwatcher.org': '39ec835fafff7de71482b2c5f84b9fc9',
   'socom.vn': 'df8823b29695d7c0b4e1aca2667e3a45',
 } as const

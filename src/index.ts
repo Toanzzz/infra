@@ -5,6 +5,7 @@ import {
   ToanCloudflareZones,
 } from './libs/constants.ts'
 import { DnsRecords } from './resources/cloudflare.dns.ts'
+import { ZoneRedirects } from './resources/cloudflare.redirect.ts'
 import { OracleInstance } from './resources/oci.instance.ts'
 import { Vcn } from './resources/oci.vcn.ts'
 
@@ -207,5 +208,35 @@ new DnsRecords('cloudflare-dns', {
       type: 'AAAA',
       proxied: false,
     },
+    {
+      zoneId: NerdCoderCloudflareZones['shopwatcher.org'],
+      name: 'api',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: NerdCoderCloudflareZones['shopwatcher.org'],
+      name: 'api',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
+    // The apex is the shop-watcher web Worker's custom domain, created by its
+    // wrangler deploy. www only exists so the redirect below can match it.
+    {
+      zoneId: NerdCoderCloudflareZones['shopwatcher.org'],
+      name: 'www',
+      content: '100::',
+      type: 'AAAA',
+      proxied: true,
+    },
+  ],
+})
+
+new ZoneRedirects('shopwatcher-org-redirects', {
+  zoneId: NerdCoderCloudflareZones['shopwatcher.org'],
+  redirects: [
+    { fromHost: 'www.shopwatcher.org', toOrigin: 'https://shopwatcher.org' },
   ],
 })

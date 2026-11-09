@@ -159,8 +159,9 @@ saigon-tour-api.toan.io {
 # --- shop-watcher ------------------------------------------------------------
 # Backend API only; the web app is a Cloudflare Worker. One replica (it is the
 # only DBOS executor) that the deploy recreates in place, so a static upstream on
-# the explicit `shop-watcher-api` alias.
+# the explicit `shop-watcher-api` alias. shop-watcher-api.toan.io is the old
+# hostname, kept for clients that still point at it.
 
-shop-watcher-api.toan.io {
+api.shopwatcher.org, shop-watcher-api.toan.io {
 	reverse_proxy shop-watcher-api:57001
 }
