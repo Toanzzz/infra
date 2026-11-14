@@ -222,6 +222,20 @@ new DnsRecords('cloudflare-dns', {
       type: 'AAAA',
       proxied: false,
     },
+    {
+      zoneId: NerdCoderCloudflareZones['shopwatcher.org'],
+      name: 'search',
+      content: instance.publicIp,
+      type: 'A',
+      proxied: false,
+    },
+    {
+      zoneId: NerdCoderCloudflareZones['shopwatcher.org'],
+      name: 'search',
+      content: instance.publicIpv6,
+      type: 'AAAA',
+      proxied: false,
+    },
     // The apex is the shop-watcher web Worker's custom domain, created by its
     // wrangler deploy. www only exists so the redirect below can match it.
     {

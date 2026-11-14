@@ -165,3 +165,10 @@ saigon-tour-api.toan.io {
 api.shopwatcher.org, shop-watcher-api.toan.io {
 	reverse_proxy shop-watcher-api:57001
 }
+
+# Public discovery text only. Typesense admin routes stay inside the Docker network.
+search.shopwatcher.org {
+	@public path /multi_search /health
+	reverse_proxy @public shop-watcher-typesense:8108
+	respond 404
+}
