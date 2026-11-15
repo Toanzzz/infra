@@ -13,6 +13,11 @@ export interface DnsRecordsArgs {
   records: DnsRecordArgs[]
 }
 
+function recordResourceName(componentName: string, record: DnsRecordArgs): string {
+  const host = record.name === '@' ? 'apex' : record.name
+  return `${componentName}-${record.zoneId.slice(0, 8)}-${host}-${record.type}`
+}
+
 export class DnsRecords extends pulumi.ComponentResource {
   constructor(
     name: string,
@@ -23,7 +28,7 @@ export class DnsRecords extends pulumi.ComponentResource {
 
     args.records.forEach((record, index) => {
       new cloudflare.DnsRecord(
-        `${name}-record-${index}`,
+        recordResourceName(name, record),
         {
           name: record.name,
           type: record.type,
@@ -36,7 +41,13 @@ export class DnsRecords extends pulumi.ComponentResource {
         },
         {
           parent: this,
-          aliases: [{ parent: pulumi.rootStackResource }],
+          // Keep the old parent=root alias, and map each record off its former
+          // index-based name so reordering/removal no longer shifts ownership.
+          aliases: [
+            { parent: pulumi.rootStackResource },
+            { name: `${name}-record-${index}`, parent: this },
+          ],
+          deleteBeforeReplace: true,
         }
       )
     })
